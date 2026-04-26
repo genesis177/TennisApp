@@ -1,0 +1,94 @@
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    acme.cert-manager.io/http01-edit-in-place: "true"
+    kubernetes.io/tls-acme: "true"
+  name: tennis-games-ingress
+  namespace: default
+  labels:
+    app: tennis-games-service
+spec:
+  rules:
+    - host: tennis-api.endpoints.tennis-games.cloud.goog
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: tennis-games-service
+              servicePort: gamehttp
+  tls:
+    - hosts:
+        - tennis-api.endpoints.tennis-games.cloud.goog
+      secretName: tennis-api-endpoints-cert
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tennis-games-service
+  namespace: default
+spec:
+  ports:
+    - name: gamehttp
+      port: 8088
+      protocol: TCP
+      targetPort: 8081
+  selector:
+    app: tennis-games-service
+  type: NodePort
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tennis-games-service
+  namespace: default
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: tennis-games-service
+  template:
+    metadata:
+      labels:
+        app: tennis-games-service
+    spec:
+      containers:
+        - name: esp
+          image: gcr.io/endpoints-release/endpoints-runtime:1
+          imagePullPolicy: Always
+          args: [
+            "--http_port=8081",
+            "--backend=localhost:8080",
+            "--service=tennis-api.endpoints.tennis-games.cloud.goog",
+            "--rollout_strategy=managed",
+            "--dns=169.254.169.254"
+          ]
+          ports:
+            - containerPort: 8081
+        - name: tennis-games-service
+          image: eu.gcr.io/tennis-games/tennis-games-service:latest
+          imagePullPolicy: Always
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            timeoutSeconds: 7
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            timeoutSeconds: 7
+          ports:
+            - containerPort: 8080
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: cloud

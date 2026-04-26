@@ -1,0 +1,133 @@
+swagger: '2.0'
+info:
+  title: Tennis Service
+  version: 1.0.0
+  description: Сервис тенниса позволяет генерировать игры для мужских/женских пар
+
+x-google-allow: all
+x-google-endpoints:
+  - name: tennis-api.endpoints.tennis-games.cloud.goog
+    allowCors: true
+    target: 35.205.70.155
+
+paths:
+  /games:
+    get:
+      summary: Получает новый набор игр для проведения
+      operationId: generateGames
+      parameters:
+        - name: games
+          in: query
+          description: количество игр для генерации, по умолчанию — все
+          type: integer
+        - name: courts
+          in: query
+          required: true
+          description: количество доступных кортов
+          type: integer
+        - name: interval
+          in: query
+          required: true
+          description: интервал, на который распределяются игры
+          type: string
+        - name: date
+          in: query
+          required: false
+          description: первая дата, с которой должны начинаться матчи в каждом интервале
+          type: string
+          format: date
+        - name: groupA
+          in: query
+          required: true
+          description: уникальные имена всех игроков группы A
+          type: array
+          items:
+            type: string
+        - name: groupB
+          in: query
+          required: true
+          description: уникальные имена всех игроков группы B
+          type: array
+          items:
+            type: string
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: список игр, которые будут сыграны
+          schema:
+            $ref: "#/definitions/GamesResponse"
+
+definitions:
+
+  PlayerView:
+    type: object
+    required:
+      - name
+      - group
+    properties:
+      name:
+        type: string
+      group:
+        type: string
+        enum:
+          - A
+          - B
+
+  TeamView:
+    type: object
+    required:
+      - playerA
+      - playerB
+    properties:
+      playerA:
+        $ref: "#/definitions/PlayerView"
+      playerB:
+        $ref: "#/definitions/PlayerView"
+
+  MatchView:
+    type: object
+    required:
+      - teamA
+      - teamB
+    properties:
+      court:
+        type: integer
+      teamA:
+        $ref: "#/definitions/TeamView"
+      teamB:
+        $ref: "#/definitions/TeamView"
+
+  Interval:
+    type: object
+    required:
+      - matches
+    properties:
+      id:
+        type: string
+        format: uuid
+      date:
+        type: string
+        format: date
+      matches:
+        type: array
+        items:
+          $ref: "#/definitions/MatchView"
+
+  GamesResponse:
+    type: object
+    required:
+      - courts
+      - interval
+      - intervals
+    properties:
+      courts:
+        type: integer
+      intervalType:
+        type: string
+      intervals:
+        type: array
+        items:
+          $ref: "#/definitions/Interval"
+
+
