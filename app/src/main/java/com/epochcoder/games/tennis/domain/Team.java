@@ -37,7 +37,7 @@ public abstract class Team {
 
     public static Set<Team> makeTeams(final List<Player> set1, final List<Player> set2) {
         if (set1 == null || set2 == null
-                || (set1.size() + set2.size()) % 4 != 0) {
+            || (set1.size() + set2.size()) % 4 != 0) {
             throw new IllegalArgumentException("Null input or players not in groups of 4");
         }
 
@@ -57,8 +57,8 @@ public abstract class Team {
 
     public static List<Team> getTeamsWithUnusedPlayers(final Set<Team> teams, final Set<Player> usedPlayers) {
         return teams.stream()
-                .filter(t -> usedPlayers.stream().noneMatch(t.getPlayers()::contains))
-                .collect(Collectors.toList());
+            .filter(t -> usedPlayers.stream().noneMatch(t.getPlayers()::contains))
+            .collect(Collectors.toList());
     }
 
 }

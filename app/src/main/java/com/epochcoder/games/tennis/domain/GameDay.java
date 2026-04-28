@@ -28,27 +28,25 @@ public abstract class GameDay {
     public abstract List<Match> getMatches();
 
     public static List<GameDay> buildGameDays(
-            final TemporalUnit unit, final LocalDate firstDate,
-            final Set<Team> teams, final int courts) {
+        final TemporalUnit unit, final LocalDate firstDate,
+        final Set<Team> teams, final int courts) {
         final Set<Player> allPlayers = Player.getPlayers(teams);
         final int courtsPlayable = allPlayers.size() / 4;
         if (courts > courtsPlayable) {
             throw new IllegalArgumentException(
-                    "Cannot place matches on more than " + courtsPlayable + " courts");
+                "Cannot place matches on more than " + courtsPlayable + " courts");
         }
 
-        // get games letting each player play
         final List<Game> games = Game.findGames(
-                Collections.unmodifiableSet(teams),
-                Collections.unmodifiableSet(allPlayers),
-                new LinkedHashSet<>(0),
-                0);
+            Collections.unmodifiableSet(teams),
+            Collections.unmodifiableSet(allPlayers),
+            new LinkedHashSet<>(0),
+            0);
 
         if (games.isEmpty()) {
             throw new IllegalStateException("Could not generate games");
         }
 
-        // possible to shuffle since our sets are complete
         Collections.shuffle(games);
 
         final List<Match> matches = Match.teamBasedMatchOrdering(games, new ArrayList<>(teams));
@@ -58,8 +56,8 @@ public abstract class GameDay {
     }
 
     public static List<GameDay> fromMatches(
-            final TemporalUnit temporalUnit, final LocalDate firstDate,
-            final int courts, final List<Match> matches) {
+        final TemporalUnit temporalUnit, final LocalDate firstDate,
+        final int courts, final List<Match> matches) {
         final AtomicInteger counter = new AtomicInteger();
         final LocalDate localDate = firstDate != null ? firstDate : getFirstWeekend();
 
@@ -68,12 +66,12 @@ public abstract class GameDay {
 
 
         return Lists.partition(matches, partitionSize).stream()
-                .map(mapGameDay(temporalUnit, counter, localDate))
-                .collect(Collectors.toList());
+            .map(mapGameDay(temporalUnit, counter, localDate))
+            .collect(Collectors.toList());
     }
 
     private static Function<List<Match>, ImmutableGameDay> mapGameDay(
-            final TemporalUnit temporalUnit, final AtomicInteger counter, final LocalDate today) {
+        final TemporalUnit temporalUnit, final AtomicInteger counter, final LocalDate today) {
         return matchPartition -> {
             ImmutableGameDay.Builder builder = ImmutableGameDay.builder();
             if (temporalUnit != null) {

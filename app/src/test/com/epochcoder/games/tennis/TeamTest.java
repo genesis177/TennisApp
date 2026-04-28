@@ -79,15 +79,15 @@ class TeamTest {
 
     private Player createPlayer(final PlayerGroup playerGroup) {
         return ImmutablePlayer.builder()
-                .name(UUID.randomUUID().toString())
-                .playerGroup(playerGroup)
-                .build();
+            .name(UUID.randomUUID().toString())
+            .playerGroup(playerGroup)
+            .build();
     }
 
     private Team createTeam(final Player p1, final Player p2) {
         return ImmutableTeam.builder()
-                .playerA(p1)
-                .playerB(p2)
-                .build();
+            .playerA(p1)
+            .playerB(p2)
+            .build();
     }
 }

@@ -17,17 +17,17 @@ public abstract class Player {
 
     public static List<Player> toPlayers(final PlayerGroup playerGroup, final String... names) {
         return Arrays.stream(names)
-                .map(name -> ImmutablePlayer.builder()
-                        .playerGroup(playerGroup)
-                        .name(name)
-                        .build())
-                .sorted(Comparator.comparing(Player::getName))
-                .collect(Collectors.toUnmodifiableList());
+            .map(name -> ImmutablePlayer.builder()
+                .playerGroup(playerGroup)
+                .name(name)
+                .build())
+            .sorted(Comparator.comparing(Player::getName))
+            .collect(Collectors.toUnmodifiableList());
     }
 
     public static Set<Player> getPlayers(final Set<Team> teams) {
         return teams.stream()
-                .flatMap(t -> t.getPlayers().stream())
-                .collect(Collectors.toSet());
+            .flatMap(t -> t.getPlayers().stream())
+            .collect(Collectors.toSet());
     }
 }
